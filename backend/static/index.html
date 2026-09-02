@@ -831,6 +831,8 @@
           list.forEach(s => scenariosData[s.id] = s);
         }
       } catch (e) {}
+    }
+
     function playScenario(scenarioId, btn) {
       document.querySelectorAll(".btn-scenario").forEach(b => b.classList.remove("active"));
       if (btn) {
