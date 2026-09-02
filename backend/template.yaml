@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SatyaCall - Serverless Real-Time Scam & AI Voice Detection Backend on AWS Lambda
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 2048
+    Runtime: python3.11
+
+Resources:
+  SatyaCallFastAPIFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: app.main.handler
+      Environment:
+        Variables:
+          DATABASE_URL: !Ref PostgresDatabaseUrl
+          BHASHINI_API_KEY: !Ref BhashiniApiKey
+          OPENAI_API_KEY: !Ref OpenAiApiKey
+      Events:
+        HttpApi:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+  SatyaCallWebSocketApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: SatyaCallWebSocketApi
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: "$request.body.action"
+
+Parameters:
+  PostgresDatabaseUrl:
+    Type: String
+    Default: "sqlite:///./satyacall_threats.db"
+    Description: PostgreSQL connection string (e.g. AWS RDS or Supabase)
+  BhashiniApiKey:
+    Type: String
+    NoEcho: true
+    Default: "demo_bhashini_key"
+  OpenAiApiKey:
+    Type: String
+    NoEcho: true
+    Default: "demo_openai_key"
+
+Outputs:
+  SatyaCallApiUrl:
+    Description: "API Gateway HTTP URL for REST endpoints"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
+  SatyaCallWebSocketUrl:
+    Description: "API Gateway WebSocket URL for live call audio streaming"
+    Value: !Sub "wss://${SatyaCallWebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"

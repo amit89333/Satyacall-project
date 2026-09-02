@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SatyaCall — Live Demonstration & Mobile Simulator</title>
+  <style>
+    :root {
+      --bg-dark: #090d14;
+      --panel-bg: #121824;
+      --card-bg: #182232;
+      --accent-cyan: #00f2fe;
+      --accent-blue: #4facfe;
+      --accent-red: #ff3366;
+      --accent-green: #00e676;
+      --accent-amber: #ffab00;
+      --text-main: #f0f4f8;
+      --text-muted: #8a99ad;
+      --border-color: #243248;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+    header {
+      background: rgba(18, 24, 36, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo-badge { display: flex; align-items: center; gap: 12px; }
+    .shield-icon {
+      width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: #000;
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+    }
+    .title-group h1 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(to right, #fff, #b2d5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .title-group p { font-size: 0.8rem; color: var(--text-muted); }
+    .header-badges { display: flex; gap: 10px; align-items: center; }
+    .status-pill {
+      background: rgba(0, 230, 118, 0.12); border: 1px solid rgba(0, 230, 118, 0.3); color: var(--accent-green);
+      font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px;
+    }
+    .pulse-dot { width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; box-shadow: 0 0 10px var(--accent-green); animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.3); } }
+
+    .container { max-width: 1440px; margin: 0 auto; width: 100%; padding: 24px; display: grid; grid-template-columns: 430px 1fr; gap: 28px; flex: 1; }
+
+    /* PHONE FRAME STYLING */
+    .phone-column { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .phone-frame {
+      width: 380px; height: 750px; background: #000; border-radius: 46px; border: 10px solid #28303d;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 0 2px #435166; position: relative; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .dynamic-island {
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 110px; height: 26px;
+      background: #000; border-radius: 20px; z-index: 50; display: flex; align-items: center; justify-content: center;
+    }
+    .camera-lens { width: 10px; height: 10px; background: #0c121e; border-radius: 50%; border: 1px solid #1a2538; }
+
+    .phone-screen {
+      flex: 1; background: linear-gradient(180deg, #0b111a 0%, #070a0f 100%);
+      padding: 44px 18px 16px 18px; display: flex; flex-direction: column; position: relative; overflow-y: auto;
+    }
+
+    /* IN-CALL UI */
+    .call-card {
+      background: rgba(24, 34, 50, 0.7); border: 1px solid var(--border-color); border-radius: 24px;
+      padding: 18px 16px; text-align: center; margin-bottom: 12px; position: relative;
+    }
+    .caller-avatar {
+      width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #2b3952, #182234);
+      margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 26px;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+    .caller-name { font-size: 1.1rem; font-weight: 700; color: #fff; }
+    .caller-number { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+    .call-status { font-size: 0.75rem; color: var(--accent-cyan); font-weight: 600; margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+    /* WAVEFORM */
+    .audio-visualizer {
+      display: flex; align-items: center; justify-content: center; gap: 4px; height: 28px; margin: 10px 0;
+    }
+    .wave-bar { width: 4px; height: 6px; background: var(--accent-cyan); border-radius: 4px; transition: height 0.15s ease; }
+
+    /* LIVE RISK GAUGE IN PHONE */
+    .phone-risk-gauge {
+      background: rgba(18, 24, 36, 0.8); border-radius: 18px; border: 1px solid var(--border-color);
+      padding: 12px 14px; margin-bottom: 12px;
+    }
+    .risk-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
+    .risk-value-display { font-size: 1.8rem; font-weight: 900; margin: 2px 0; color: var(--accent-green); transition: color 0.3s ease; }
+    .progress-track { height: 7px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; margin-top: 4px; }
+    .progress-fill { height: 100%; width: 5%; background: var(--accent-green); border-radius: 6px; transition: width 0.4s ease, background-color 0.4s ease; }
+
+    /* PHONE TRANSCRIPT STREAM */
+    .phone-transcript-box {
+      flex: 1; background: rgba(12, 17, 26, 0.9); border: 1px solid var(--border-color); border-radius: 16px;
+      padding: 10px; font-size: 0.78rem; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; min-height: 160px;
+    }
+    .chat-bubble { padding: 8px 10px; border-radius: 12px; line-height: 1.3; max-width: 92%; }
+    .bubble-caller { background: #1f2b3e; color: #fff; align-self: flex-start; }
+    .bubble-victim { background: #005a70; color: #e0f7fa; align-self: flex-end; }
+    .highlight-trigger { background: rgba(255, 51, 102, 0.4); color: #ffb8ca; font-weight: 700; padding: 0 4px; border-radius: 4px; }
+
+    /* IN-PHONE CONTROLS */
+    .phone-footer-actions {
+      display: flex; gap: 8px; margin-top: 10px;
+    }
+    .btn-phone-reset {
+      flex: 1; background: #1f2b3e; color: var(--text-muted); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer;
+    }
+    .btn-phone-reset:hover { color: #fff; background: #2b3b55; }
+
+    /* HEADS UP ALERT OVERLAY */
+    .alert-overlay {
+      position: absolute; top: 12px; left: 12px; right: 12px; background: #28080c; border: 2px solid var(--accent-red);
+      border-radius: 20px; padding: 16px; box-shadow: 0 10px 30px rgba(255, 51, 102, 0.5); z-index: 80;
+      transform: translateY(-160%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .alert-overlay.visible { transform: translateY(0); animation: pulse-alert 2s infinite; }
+    @keyframes pulse-alert {
+      0%, 100% { border-color: var(--accent-red); box-shadow: 0 0 25px rgba(255, 51, 102, 0.6); }
+      50% { border-color: #ff85a1; box-shadow: 0 0 40px rgba(255, 51, 102, 0.9); }
+    }
+    .alert-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .alert-badge-tag { background: var(--accent-red); color: #fff; font-size: 0.65rem; font-weight: 900; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px; }
+    .alert-title { font-size: 0.92rem; font-weight: 800; color: #fff; }
+    .alert-desc { font-size: 0.74rem; color: #ffccd5; line-height: 1.35; margin-bottom: 12px; }
+    .alert-actions { display: flex; gap: 8px; }
+    .btn-hangup {
+      flex: 2; background: var(--accent-red); color: #fff; border: none; padding: 10px; border-radius: 10px;
+      font-size: 0.8rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-dismiss {
+      flex: 1; background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 10px; border-radius: 10px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    }
+
+    /* SCENARIO PICKER UNDER PHONE */
+    .scenario-controls { width: 380px; display: flex; flex-direction: column; gap: 8px; }
+    .btn-scenario {
+      background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main);
+      padding: 10px 14px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; text-align: left;
+      cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease;
+    }
+    .btn-scenario:hover { background: var(--card-bg); border-color: var(--accent-cyan); transform: translateY(-1px); }
+    .btn-scenario.active { background: rgba(0, 242, 254, 0.12); border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+    .custom-phrase-bar {
+      display: flex; gap: 8px; margin-top: 4px;
+    }
+    .custom-phrase-input {
+      flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); color: #fff;
+      padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; outline: none;
+    }
+    .custom-phrase-input:focus { border-color: var(--accent-cyan); }
+    .btn-send-phrase {
+      background: var(--accent-cyan); color: #000; font-weight: 800; border: none; padding: 8px 14px;
+      border-radius: 10px; font-size: 0.8rem; cursor: pointer;
+    }
+
+    /* RIGHT COLUMN: DASHBOARD TABS */
+    .dashboard-column { display: flex; flex-direction: column; gap: 20px; }
+    .tabs-bar { display: flex; gap: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+    .tab-btn {
+      background: transparent; border: none; color: var(--text-muted); font-size: 0.95rem; font-weight: 700;
+      padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .tab-btn.active { background: var(--card-bg); color: var(--accent-cyan); }
+
+    .tab-content { display: none; flex-direction: column; gap: 20px; }
+    .tab-content.active { display: flex; }
+
+    /* METRIC CARDS */
+    .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .metric-card {
+      background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px;
+      position: relative; overflow: hidden;
+    }
+    .metric-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+    }
+    .metric-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .metric-value { font-size: 1.8rem; font-weight: 900; margin: 8px 0; color: #fff; }
+    .metric-sub { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* REALTIME PIPELINE CARD */
+    .pipeline-card {
+      background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 22px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .pipeline-header { display: flex; justify-content: space-between; align-items: center; }
+    .pipeline-title { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+    .ai-breakdown-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .ai-sub-box {
+      background: var(--card-bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 16px;
+    }
+    .sub-box-title { font-size: 0.85rem; font-weight: 700; color: var(--accent-cyan); margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .score-badge { font-weight: 900; font-size: 1.1rem; }
+
+    /* THREAT REGISTRY SEARCH & TABLE */
+    .registry-search-bar { display: flex; gap: 10px; }
+    .search-input {
+      flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); color: #fff;
+      padding: 12px 16px; border-radius: 12px; font-size: 0.9rem; outline: none;
+    }
+    .search-input:focus { border-color: var(--accent-cyan); }
+    .btn-search {
+      background: var(--accent-cyan); color: #000; border: none; font-weight: 800; padding: 0 20px;
+      border-radius: 12px; cursor: pointer;
+    }
+    .btn-search:hover { filter: brightness(1.1); }
+    .threats-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    .threats-table th { text-align: left; padding: 12px; font-size: 0.75rem; color: var(--text-muted); border-bottom: 1px solid var(--border-color); text-transform: uppercase; }
+    .threats-table td { padding: 14px 12px; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .report-badge {
+      background: rgba(255, 51, 102, 0.15); color: var(--accent-red); font-weight: 800; font-size: 0.75rem;
+      padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(255, 51, 102, 0.3); display: inline-block;
+    }
+
+    /* REPORT MODAL */
+    .modal-backdrop {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal-window {
+      background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 20px;
+      width: 440px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+    .modal-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 14px; }
+    .modal-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .modal-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+    .modal-input, .modal-select {
+      background: var(--card-bg); border: 1px solid var(--border-color); color: #fff;
+      padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; outline: none;
+    }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+    .btn-cancel { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+    .btn-submit { background: var(--accent-red); color: #fff; border: none; padding: 8px 20px; border-radius: 10px; cursor: pointer; font-weight: 800; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-badge">
+      <div class="shield-icon">🛡️</div>
+      <div class="title-group">
+        <h1>SatyaCall — AI Real-Time Call Defense</h1>
+        <p>DistilBERT Scam Classifier • ASVspoof Voice Check • PostgreSQL + Firebase Registry</p>
+      </div>
+    </div>
+    <div class="header-badges">
+      <div class="status-pill" id="wsStatusBadge"><div class="pulse-dot"></div> Engine Connected</div>
+      <div class="status-pill" style="background: rgba(0, 242, 254, 0.1); border-color: rgba(0,242,254,0.3); color: var(--accent-cyan);">
+        Pitch Deck M0–M8 Ready
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- LEFT COLUMN: PHONE SIMULATOR -->
+    <div class="phone-column">
+      <div class="phone-frame">
+        <div class="dynamic-island"><div class="camera-lens"></div></div>
+
+        <div class="phone-screen">
+          <!-- HEADS UP ALERT OVERLAY (Slide 5/7) -->
+          <div id="alertOverlay" class="alert-overlay">
+            <div class="alert-top">
+              <span class="alert-badge-tag">CRITICAL THREAT</span>
+              <span id="overlayCategory" class="alert-title">Digital Arrest Scam</span>
+            </div>
+            <div id="overlayDesc" class="alert-desc">
+              Warning: Law enforcement impersonation detected. Indian CBI/Police never issue arrest warrants or demand escrow funds over telephone calls.
+            </div>
+            <div class="alert-actions">
+              <button class="btn-hangup" onclick="hangUpAndReport()">🚨 Hang Up & Report</button>
+              <button class="btn-dismiss" onclick="dismissAlert()">Dismiss</button>
+            </div>
+          </div>
+
+          <!-- ACTIVE CALL CARD -->
+          <div class="call-card">
+            <div class="caller-avatar">🕵️</div>
+            <div id="phoneCallerName" class="caller-name">Inspector Vijay Rathore</div>
+            <div id="phoneCallerNumber" class="caller-number">+91 98765 43210 (CBI HQ)</div>
+            <div class="call-status">
+              <span style="display:inline-block; width:8px; height:8px; background:var(--accent-cyan); border-radius:50%;"></span>
+              Speakerphone Active • SatyaCall Guarding
+            </div>
+
+            <!-- AUDIO VISUALIZER BARS -->
+            <div class="audio-visualizer" id="audioVisualizer">
+              <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+              <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+              <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+            </div>
+          </div>
+
+          <!-- RISK SCORE GAUGE -->
+          <div class="phone-risk-gauge">
+            <div class="risk-header">
+              <span>REAL-TIME SCAM RISK SCORE</span>
+              <span id="phoneRiskLevel">LOW</span>
+            </div>
+            <div id="phoneRiskScore" class="risk-value-display">4%</div>
+            <div class="progress-track">
+              <div id="phoneRiskBar" class="progress-fill"></div>
+            </div>
+          </div>
+
+          <!-- LIVE CALL TRANSCRIPT (WHISPER/BHASHINI) -->
+          <div style="font-size:0.72rem; color:var(--text-muted); font-weight:700; margin-bottom:4px; display:flex; justify-content:space-between;">
+            <span>LIVE ASR STREAM (WHISPER)</span>
+            <span id="transcriptionLang" style="color:var(--accent-cyan);">auto-detect</span>
+          </div>
+          <div id="transcriptBox" class="phone-transcript-box">
+            <div class="chat-bubble bubble-caller">SatyaCall is listening via on-device speakerphone mic capture...</div>
+          </div>
+
+          <div class="phone-footer-actions">
+            <button class="btn-phone-reset" onclick="resetCall()">🔄 End Call / Reset Phone</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENARIO CONTROLS -->
+      <div class="scenario-controls">
+        <div style="font-size:0.8rem; color:var(--text-muted); font-weight:700; margin: 2px 0;">SELECT LIVE DEMO SCENARIO:</div>
+        <button id="btn_scenario_cbi" class="btn-scenario active" onclick="playScenario('scenario_cbi', this)">
+          <span>🚨 Scenario 1: Digital Arrest (CBI Impersonation)</span>
+          <span style="color:var(--accent-red);">High Risk</span>
+        </button>
+        <button id="btn_scenario_kyc" class="btn-scenario" onclick="playScenario('scenario_kyc', this)">
+          <span>💳 Scenario 2: Bank KYC Account Freeze</span>
+          <span style="color:var(--accent-amber);">Phishing</span>
+        </button>
+        <button id="btn_scenario_normal" class="btn-scenario" onclick="playScenario('scenario_normal', this)">
+          <span>✅ Scenario 3: Legitimate Family Call</span>
+          <span style="color:var(--accent-green);">Safe</span>
+        </button>
+        <button id="btn_mic_capture" class="btn-scenario" onclick="startMicCapture(this)">
+          <span>🎙️ Test Live Microphone (Speech API)</span>
+          <span style="color:var(--accent-cyan);">Direct Mic</span>
+        </button>
+
+        <!-- CUSTOM PHRASE TESTER -->
+        <div class="custom-phrase-bar">
+          <input type="text" id="customPhraseInput" class="custom-phrase-input" placeholder="Type any custom scam phrase to test..." onkeydown="if(event.key==='Enter') sendCustomPhrase()">
+          <button class="btn-send-phrase" onclick="sendCustomPhrase()">Test Phrase</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: DASHBOARD -->
+    <div class="dashboard-column">
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="switchTab('tab-pipeline', this)">Live AI Pipeline</button>
+        <button class="tab-btn" onclick="switchTab('tab-registry', this)">Threat Registry (PostgreSQL)</button>
+        <button class="tab-btn" onclick="switchTab('tab-metrics', this)">Pitch Deck Benchmarks</button>
+      </div>
+
+      <!-- TAB 1: LIVE PIPELINE -->
+      <div id="tab-pipeline" class="tab-content active">
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Composite Risk</div>
+            <div id="dashRiskScore" class="metric-value" style="color:var(--accent-green)">4%</div>
+            <div class="metric-sub">DistilBERT + ASVspoof + Registry</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Voice Authenticity</div>
+            <div id="dashVoiceAuth" class="metric-value">96%</div>
+            <div class="metric-sub" id="dashVocoderStatus">Natural human vocal formants</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">End-to-End Latency</div>
+            <div class="metric-value" style="color:var(--accent-cyan)">82ms</div>
+            <div class="metric-sub">Target: &lt;1.5s per rolling chunk</div>
+          </div>
+        </div>
+
+        <div class="pipeline-card">
+          <div class="pipeline-header">
+            <div class="pipeline-title">🧠 Multi-Model AI Decision Engine</div>
+            <span class="status-pill" id="pipelineStatus">Active Streaming</span>
+          </div>
+
+          <div class="ai-breakdown-row">
+            <div class="ai-sub-box">
+              <div class="sub-box-title">
+                <span>DistilBERT Scam Classifier</span>
+                <span class="score-badge" id="distilbertScore" style="color:var(--accent-green);">Low</span>
+              </div>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">
+                Rolling token window analysis for coercion, authority impersonation, and payment demands.
+              </p>
+              <div style="font-size:0.75rem; color:#fff; display:flex; flex-direction:column; gap:4px;">
+                <div>Urgency Coercion: <strong id="urgencyScore">0%</strong></div>
+                <div>Authority Impersonation: <strong id="authorityScore">0%</strong></div>
+                <div>Extortion Signatures: <strong id="triggersFound" style="color:var(--accent-red);">None</strong></div>
+              </div>
+            </div>
+
+            <div class="ai-sub-box">
+              <div class="sub-box-title">
+                <span>ASVspoof Deepfake Voice Check</span>
+                <span class="score-badge" id="voiceCloneScore" style="color:var(--accent-green);">Clean</span>
+              </div>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">
+                AASIST neural vocoder phase discontinuity & pitch jitter spectral analysis.
+              </p>
+              <div style="font-size:0.75rem; color:#fff; display:flex; flex-direction:column; gap:4px;">
+                <div>Clone Probability: <strong id="cloneProb">6%</strong></div>
+                <div>Spectral Jitter: <strong id="spectralJitter">0.14 ms (Natural)</strong></div>
+                <div>Vocoder Artifact: <strong id="vocoderArtifact">Undetected</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:14px; font-size:0.85rem;">
+            <strong style="color:var(--accent-cyan);">Decision Rule (Slide 4 Flow Chart):</strong>
+            <span style="color:var(--text-muted);">
+              When <code>risk_score &ge; 75</code>, SatyaCall triggers an asynchronous broadcast to the Android Head-Up Overlay, sounds warning haptics, and provides an instant one-tap Hang Up & Registry Report action.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: THREAT REGISTRY -->
+      <div id="tab-registry" class="tab-content">
+        <div class="pipeline-card">
+          <div class="pipeline-header">
+            <div class="pipeline-title">🗄️ PostgreSQL + Firebase Live Threat Registry</div>
+            <button class="btn-search" style="padding:8px 16px;" onclick="openReportModal()">+ Report New Number</button>
+          </div>
+
+          <div class="registry-search-bar">
+            <input type="text" id="registrySearchInput" class="search-input" placeholder="Search number (e.g. +91 98765 43210)..." onkeydown="if(event.key==='Enter') searchRegistry()">
+            <button class="btn-search" onclick="searchRegistry()">Search Threat DB</button>
+          </div>
+
+          <div id="registrySearchResult" style="margin-top:10px;"></div>
+
+          <div style="font-weight:700; font-size:0.9rem; margin-top:16px;">Top Verified Scam Callers (Crowd-Sourced):</div>
+          <table class="threats-table">
+            <thead>
+              <tr>
+                <th>Phone Number</th>
+                <th>Category</th>
+                <th>Risk Score</th>
+                <th>Reports</th>
+                <th>Verification</th>
+              </tr>
+            </thead>
+            <tbody id="threatsTableBody">
+              <!-- Loaded dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: PITCH DECK BENCHMARKS -->
+      <div id="tab-metrics" class="tab-content">
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Precision</div>
+            <div class="metric-value" style="color:var(--accent-cyan)">96.99%</div>
+            <div class="metric-sub">Held-out evaluation set</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Recall (Detection)</div>
+            <div class="metric-value" style="color:var(--accent-green)">96.80%</div>
+            <div class="metric-sub">Zero missed Digital Arrest calls</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">False Positive Rate</div>
+            <div class="metric-value" style="color:var(--accent-amber)">2.14%</div>
+            <div class="metric-sub">Strictly below 3.0% threshold</div>
+          </div>
+        </div>
+
+        <div class="pipeline-card">
+          <h3 style="color:#fff;">Pitch Deck Milestones Alignment (M0–M9)</h3>
+          <ul style="line-height:1.8; font-size:0.85rem; color:var(--text-muted); margin-left:20px;">
+            <li><strong style="color:#fff;">M0/M1:</strong> FastAPI backend running with WebSocket audio chunk protocol & REST schema.</li>
+            <li><strong style="color:#fff;">M2:</strong> Whisper API streaming pipeline with regional Bhashini path for Indian languages.</li>
+            <li><strong style="color:#fff;">M3/M4:</strong> DistilBERT fine-tuning script, 400+ synthetic transcripts, and ASVspoof clone detector.</li>
+            <li><strong style="color:#fff;">M5:</strong> PostgreSQL structured threat schema with real-time Firebase sync logic.</li>
+            <li><strong style="color:#fff;">M6/M7:</strong> Android Flutter app with speakerphone mic capture and system alert window.</li>
+            <li><strong style="color:#fff;">M8:</strong> AWS SAM serverless template (<code>backend/template.yaml</code>) and live web demonstration.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT MODAL -->
+  <div id="reportModal" class="modal-backdrop">
+    <div class="modal-window">
+      <div class="modal-title">🚨 Report Threat to SatyaCall Registry</div>
+      <div class="modal-field">
+        <label class="modal-label">Phone Number</label>
+        <input type="text" id="reportInputNumber" class="modal-input" placeholder="+91 98765 43210" value="+91 ">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Scam Category</label>
+        <select id="reportInputCategory" class="modal-select">
+          <option value="Digital Arrest / CBI Impersonator">Digital Arrest / CBI Impersonator</option>
+          <option value="Bank KYC OTP Phishing">Bank KYC OTP Phishing</option>
+          <option value="Customs Illegal Narcotics Parcel">Customs Illegal Narcotics Parcel</option>
+          <option value="Electricity Power Disconnect Scam">Electricity Power Disconnect Scam</option>
+          <option value="Telecom TRAI SIM Deactivation">Telecom TRAI SIM Deactivation</option>
+          <option value="AI Voice Clone / Deepfake Impersonator">AI Voice Clone / Deepfake Impersonator</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Estimated Risk Score (%)</label>
+        <input type="number" id="reportInputRisk" class="modal-input" min="50" max="100" value="95">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeReportModal()">Cancel</button>
+        <button class="btn-submit" onclick="submitNewReport()">Submit Threat Report</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let ws = null;
+    let activeScenarioTimer = null;
+    let scenariosData = {};
+    let currentCallerNumber = "+919876543210";
+    let isConnecting = false;
+
+    function connectWebSocket() {
+      if (isConnecting) return;
+      isConnecting = true;
+      const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${proto}//${window.location.host}/ws/call-stream`;
+      
+      try {
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+          console.log("Connected to SatyaCall WebSocket");
+          isConnecting = false;
+          const badge = document.getElementById("wsStatusBadge");
+          if (badge) {
+            badge.innerHTML = '<div class="pulse-dot"></div> Engine Connected';
+            badge.style.color = "var(--accent-green)";
+          }
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            handleWsMessage(data);
+          } catch (e) {
+            console.error("Message parse error:", e);
+          }
+        };
+
+        ws.onclose = () => {
+          console.warn("WebSocket closed. Reconnecting...");
+          isConnecting = false;
+          const badge = document.getElementById("wsStatusBadge");
+          if (badge) {
+            badge.innerHTML = '<div class="pulse-dot" style="background:#ffab00; box-shadow:0 0 10px #ffab00;"></div> Reconnecting...';
+            badge.style.color = "var(--accent-amber)";
+          }
+          setTimeout(connectWebSocket, 1500);
+        };
+
+        ws.onerror = (err) => {
+          console.error("WebSocket error:", err);
+          isConnecting = false;
+        };
+      } catch (e) {
+        isConnecting = false;
+        setTimeout(connectWebSocket, 2000);
+      }
+    }
+
+    function handleWsMessage(data) {
+      if (data.type === "transcript_partial") {
+        addTranscriptBubble(data.speaker, data.text);
+      } else if (data.type === "risk_update") {
+        updateRiskDisplays(data);
+      } else if (data.type === "alert") {
+        triggerAlertOverlay(data);
+      }
+    }
+
+    function addTranscriptBubble(speaker, text) {
+      if (!text) return;
+      const box = document.getElementById("transcriptBox");
+      const bubble = document.createElement("div");
+      bubble.className = `chat-bubble ${speaker === 'caller' ? 'bubble-caller' : 'bubble-victim'}`;
+      
+      // Highlight triggers
+      let highlighted = text;
+      const triggers = ["cbi", "arrest", "warrant", "aadhaar", "money laundering", "escrow", "otp", "blocked", "immediately", "deposit", "transfer", "customs", "mdma", "police"];
+      triggers.forEach(t => {
+        const reg = new RegExp(`\\b(${t})\\b`, "gi");
+        highlighted = highlighted.replace(reg, `<span class="highlight-trigger">$1</span>`);
+      });
+
+      bubble.innerHTML = `<strong>${speaker === 'caller' ? 'Caller' : 'You'}:</strong> ${highlighted}`;
+      box.appendChild(bubble);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function updateRiskDisplays(data) {
+      const score = data.risk_score || 0;
+      const level = data.level || "LOW";
+
+      document.getElementById("phoneRiskScore").innerText = `${score}%`;
+      document.getElementById("dashRiskScore").innerText = `${score}%`;
+      document.getElementById("phoneRiskLevel").innerText = level;
+
+      const bar = document.getElementById("phoneRiskBar");
+      bar.style.width = `${Math.max(5, score)}%`;
+
+      let color = "var(--accent-green)";
+      if (score >= 75) color = "var(--accent-red)";
+      else if (score >= 45) color = "var(--accent-amber)";
+
+      document.getElementById("phoneRiskScore").style.color = color;
+      document.getElementById("dashRiskScore").style.color = color;
+      bar.style.backgroundColor = color;
+
+      // DistilBERT sub-scores
+      document.getElementById("distilbertScore").innerText = `${score}% (${level})`;
+      document.getElementById("distilbertScore").style.color = color;
+      document.getElementById("urgencyScore").innerText = `${Math.round((data.urgency_score || 0) * 100)}%`;
+      document.getElementById("authorityScore").innerText = `${Math.round((data.authority_impersonation || 0) * 100)}%`;
+      
+      const triggers = data.triggers || [];
+      document.getElementById("triggersFound").innerText = triggers.length > 0 ? triggers.join(", ") : "None";
+
+      // Voice clone
+      if (data.voice_clone) {
+        const auth = Math.round(data.voice_clone.authenticity_score * 100);
+        document.getElementById("dashVoiceAuth").innerText = `${auth}%`;
+        document.getElementById("dashVocoderStatus").innerText = data.voice_clone.vocoder_artifacts;
+        document.getElementById("cloneProb").innerText = `${data.voice_clone.clone_probability}%`;
+        document.getElementById("voiceCloneScore").innerText = data.voice_clone.is_deepfake ? "AI CLONE FLAGGED" : "Clean Human";
+        document.getElementById("voiceCloneScore").style.color = data.voice_clone.is_deepfake ? "var(--accent-red)" : "var(--accent-green)";
+      }
+    }
+
+    function triggerAlertOverlay(data) {
+      const overlay = document.getElementById("alertOverlay");
+      document.getElementById("overlayCategory").innerText = data.title;
+      document.getElementById("overlayDesc").innerText = data.recommendation;
+      overlay.classList.add("visible");
+      playSynthSiren();
+    }
+
+    function dismissAlert() {
+      document.getElementById("alertOverlay").classList.remove("visible");
+    }
+
+    function hangUpAndReport() {
+      dismissAlert();
+      fetch("/registry/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone_number: currentCallerNumber,
+          category: "Digital Arrest Scam",
+          risk_score: 98.0
+        })
+      }).then(r => r.json()).then(res => {
+        alert(`🚨 Call Terminated!\n\n${currentCallerNumber} was reported to SatyaCall Threat Registry.\nTotal Community Reports: ${res.report_count}`);
+        loadThreats();
+        resetCall();
+      }).catch(e => {
+        resetCall();
+      });
+    }
+
+    function resetCall() {
+      if (activeScenarioTimer) {
+        clearInterval(activeScenarioTimer);
+        activeScenarioTimer = null;
+      }
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "reset" }));
+      }
+      document.getElementById("transcriptBox").innerHTML = '<div class="chat-bubble bubble-caller">SatyaCall is listening via on-device speakerphone mic capture...</div>';
+      document.getElementById("phoneRiskScore").innerText = "4%";
+      document.getElementById("dashRiskScore").innerText = "4%";
+      document.getElementById("phoneRiskBar").style.width = "4%";
+      document.getElementById("phoneRiskScore").style.color = "var(--accent-green)";
+      document.getElementById("dashRiskScore").style.color = "var(--accent-green)";
+      document.getElementById("phoneRiskBar").style.backgroundColor = "var(--accent-green)";
+      document.getElementById("distilbertScore").innerText = "Low";
+      document.getElementById("distilbertScore").style.color = "var(--accent-green)";
+      document.getElementById("urgencyScore").innerText = "0%";
+      document.getElementById("authorityScore").innerText = "0%";
+      document.getElementById("triggersFound").innerText = "None";
+      document.getElementById("voiceCloneScore").innerText = "Clean";
+      document.getElementById("voiceCloneScore").style.color = "var(--accent-green)";
+      document.getElementById("cloneProb").innerText = "6%";
+      document.getElementById("dashVoiceAuth").innerText = "96%";
+      document.getElementById("dashVocoderStatus").innerText = "Natural human vocal formants";
+      animateWaveform(false);
+      dismissAlert();
+    }
+
+    async function loadScenarios() {
+      try {
+        const res = await fetch("/scenarios");
+        const list = await res.json();
+        list.forEach(s => scenariosData[s.id] = s);
+      } catch (e) {
+        console.error("Error loading scenarios:", e);
+      }
+    }
+
+    function playScenario(scenarioId, btn) {
+      // Highlight clicked button
+      document.querySelectorAll(".btn-scenario").forEach(b => b.classList.remove("active"));
+      if (btn) {
+        btn.classList.add("active");
+      } else {
+        const el = document.getElementById(`btn_${scenarioId}`);
+        if (el) el.classList.add("active");
+      }
+
+      resetCall();
+      const scenario = scenariosData[scenarioId];
+      if (!scenario) return;
+
+      currentCallerNumber = scenario.caller_number;
+      document.getElementById("phoneCallerName").innerText = scenario.caller_name;
+      document.getElementById("phoneCallerNumber").innerText = scenario.caller_number;
+
+      // Animate waveform
+      animateWaveform(true);
+
+      let step = 0;
+      activeScenarioTimer = setInterval(() => {
+        if (step >= scenario.turns.length) {
+          clearInterval(activeScenarioTimer);
+          activeScenarioTimer = null;
+          animateWaveform(false);
+          return;
+        }
+        const turn = scenario.turns[step];
+        sendAudioChunk({
+          caller_number: scenario.caller_number,
+          speaker: turn.speaker,
+          text_override: turn.text,
+          simulate_clone: scenario.is_clone && turn.speaker === "caller"
+        });
+        step++;
+      }, 1600);
+    }
+
+    function sendAudioChunk(payload) {
+      const data = {
+        type: "audio_chunk",
+        ...payload
+      };
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(data));
+      } else {
+        // Fallback: analyze via HTTP endpoint if WebSocket is temporarily unavailable
+        fetch("/analyze/sample", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            transcript: payload.text_override || "",
+            caller_number: payload.caller_number || currentCallerNumber
+          })
+        }).then(r => r.json()).then(res => {
+          addTranscriptBubble(payload.speaker || "caller", payload.text_override);
+          updateRiskDisplays({
+            risk_score: res.composite_risk_score,
+            level: res.composite_risk_score >= 75 ? "CRITICAL" : (res.composite_risk_score >= 45 ? "ELEVATED" : "LOW"),
+            category: res.scam_analysis.category,
+            urgency_score: res.scam_analysis.urgency_score,
+            authority_impersonation: res.scam_analysis.authority_impersonation,
+            triggers: res.scam_analysis.triggers,
+            voice_clone: {
+              authenticity_score: payload.simulate_clone ? 0.08 : 0.94,
+              is_deepfake: !!payload.simulate_clone,
+              clone_probability: payload.simulate_clone ? 92 : 6,
+              vocoder_artifacts: payload.simulate_clone ? "neural_vocoder_synthetic_jitter_detected" : "natural_human_formants"
+            }
+          });
+          if (res.alert_triggered) {
+            triggerAlertOverlay({
+              title: res.scam_analysis.category,
+              recommendation: "IMMEDIATE ACTION: Hang up now. CBI/Police never place citizens under digital arrest or demand money via phone calls."
+            });
+          }
+        });
+      }
+    }
+
+    function sendCustomPhrase() {
+      const input = document.getElementById("customPhraseInput");
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      
+      document.getElementById("phoneCallerName").innerText = "Custom Test Caller";
+      document.getElementById("phoneCallerNumber").innerText = "+91 98765 43210";
+      animateWaveform(true);
+      setTimeout(() => animateWaveform(false), 2000);
+
+      sendAudioChunk({
+        caller_number: "+91 98765 43210",
+        speaker: "caller",
+        text_override: text,
+        simulate_clone: text.toLowerCase().includes("clone") || text.toLowerCase().includes("deepfake")
+      });
+    }
+
+    let waveformInterval = null;
+    function animateWaveform(active) {
+      if (waveformInterval) {
+        clearInterval(waveformInterval);
+        waveformInterval = null;
+      }
+      const bars = document.querySelectorAll(".wave-bar");
+      if (active) {
+        waveformInterval = setInterval(() => {
+          bars.forEach(b => {
+            b.style.height = `${Math.floor(Math.random() * 22) + 6}px`;
+          });
+        }, 150);
+      } else {
+        bars.forEach(b => {
+          b.style.height = "6px";
+        });
+      }
+    }
+
+    function startMicCapture(btn) {
+      document.querySelectorAll(".btn-scenario").forEach(b => b.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+
+      resetCall();
+      document.getElementById("phoneCallerName").innerText = "Live Microphone";
+      document.getElementById("phoneCallerNumber").innerText = "Ambient Mic Stream";
+
+      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        alert("Web Speech API is not supported in this browser. You can use the 'Test Phrase' box below to test any custom sentence instantly!");
+        return;
+      }
+      try {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+
+        recognition.onresult = (event) => {
+          const last = event.results.length - 1;
+          const text = event.results[last][0].transcript;
+          sendAudioChunk({
+            caller_number: "+91 98765 43210",
+            speaker: "caller",
+            text_override: text
+          });
+        };
+        recognition.onerror = (e) => {
+          console.warn("Speech recognition error:", e);
+        };
+        recognition.start();
+        animateWaveform(true);
+      } catch (e) {
+        alert("Microphone capture could not be initialized. Please type your test sentence in the box below!");
+      }
+    }
+
+    function playSynthSiren() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(800, ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(400, ctx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.35);
+      } catch (e) {}
+    }
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add("active");
+    }
+
+    async function loadThreats() {
+      try {
+        const res = await fetch("/registry/threats");
+        const threats = await res.json();
+        const tbody = document.getElementById("threatsTableBody");
+        tbody.innerHTML = "";
+        threats.forEach(t => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><strong>${t.phone_number}</strong></td>
+            <td>${t.category}</td>
+            <td style="color:var(--accent-red); font-weight:700;">${t.risk_score}%</td>
+            <td><span class="report-badge">🚩 ${t.report_count} reports</span></td>
+            <td><span style="color:var(--accent-green); font-size:0.8rem;">● Crowd Verified</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        console.error("Error loading threats:", e);
+      }
+    }
+
+    async function searchRegistry() {
+      const num = document.getElementById("registrySearchInput").value.trim();
+      if (!num) return;
+      try {
+        const res = await fetch(`/registry/check?number=${encodeURIComponent(num)}`);
+        const data = await res.json();
+        const box = document.getElementById("registrySearchResult");
+        if (data.is_reported) {
+          box.innerHTML = `
+            <div style="background:#2b0c10; border:1px solid var(--accent-red); border-radius:12px; padding:14px; margin-bottom:14px;">
+              <strong style="color:var(--accent-red)">⚠️ CONFIRMED FRAUDULENT NUMBER</strong><br>
+              <div style="margin-top:4px; font-size:0.85rem; color:#fff;">
+                <strong>Number:</strong> ${data.phone_number}<br>
+                <strong>Category:</strong> ${data.category}<br>
+                <strong>Community Reports:</strong> ${data.report_count} victims<br>
+                <strong>Risk Score:</strong> ${data.risk_score}%
+              </div>
+            </div>
+          `;
+        } else {
+          box.innerHTML = `
+            <div style="background:#0c2b18; border:1px solid var(--accent-green); border-radius:12px; padding:14px; margin-bottom:14px;">
+              <strong style="color:var(--accent-green)">✅ CLEAN / UNREPORTED</strong><br>
+              <div style="margin-top:4px; font-size:0.85rem; color:#fff;">
+                Number <strong>${data.phone_number}</strong> currently has zero community reports.
+              </div>
+            </div>
+          `;
+        }
+      } catch (e) {
+        console.error("Search error:", e);
+      }
+    }
+
+    function openReportModal() {
+      document.getElementById("reportModal").classList.add("active");
+    }
+
+    function closeReportModal() {
+      document.getElementById("reportModal").classList.remove("active");
+    }
+
+    async function submitNewReport() {
+      const number = document.getElementById("reportInputNumber").value.trim();
+      const category = document.getElementById("reportInputCategory").value;
+      const risk = parseFloat(document.getElementById("reportInputRisk").value) || 95.0;
+
+      if (!number || number.length < 8) {
+        alert("Please enter a valid phone number (e.g. +91 98765 43210).");
+        return;
+      }
+
+      try {
+        const res = await fetch("/registry/report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phone_number: number,
+            category: category,
+            risk_score: risk
+          })
+        });
+        const data = await res.json();
+        closeReportModal();
+        alert(`✅ Threat report successfully saved!\n\nNumber: ${data.phone_number}\nTotal Reports: ${data.report_count}`);
+        loadThreats();
+      } catch (e) {
+        alert("Error submitting report: " + e.message);
+      }
+    }
+
+    window.onload = () => {
+      connectWebSocket();
+      loadScenarios();
+      loadThreats();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+[
+  {
+    "id": "scam_001",
+    "text": "This is Inspector Vijay Rathore calling from Central Bureau of Investigation CBI New Delhi. Your Aadhaar card has been found linked to 16 illegal bank accounts in Canara Bank Mumbai used for money laundering of 3.8 crore rupees. An arrest warrant has been issued against you under section 420. Do not disconnect this call or our team will reach your residence in 30 minutes. You are placed under digital arrest right now. Transfer 50,000 rupees to the supreme court verification escrow account immediately.",
+    "label": 1,
+    "category": "digital_arrest",
+    "urgency": 0.98,
+    "impersonation": 0.96
+  },
+  {
+    "id": "scam_002",
+    "text": "Namaste, I am calling from State Bank of India headquarters KYC division. Your debit card and netbanking have been temporarily blocked due to pending biometric KYC update. To unfreeze your account immediately without visiting branch, kindly read out the 6-digit OTP code sent to your registered mobile number right now or your account balance will be seized.",
+    "label": 1,
+    "category": "bank_kyc",
+    "urgency": 0.92,
+    "impersonation": 0.90
+  },
+  {
+    "id": "scam_003",
+    "text": "This is Mumbai Customs Department FedEx courier verification. A parcel sent from Mumbai to Taiwan containing 5 passports, 140 grams of MDMA narcotics and 4 credit cards under your name has been confiscated. CBI and Narcotics Control Bureau NCB are taking over. To clear your name and avoid immediate non-bailable warrant, you must stay on this line and deposit security clearance fee via RTGS.",
+    "label": 1,
+    "category": "customs_narcotics",
+    "urgency": 0.99,
+    "impersonation": 0.97
+  },
+  {
+    "id": "scam_004",
+    "text": "Dear consumer, your electricity power supply will be disconnected tonight at 9:30 PM from the main power office because your previous month bill was not updated. Please immediately contact our electricity officer on this WhatsApp number and make payment through QuickSupport app.",
+    "label": 1,
+    "category": "utility_fraud",
+    "urgency": 0.94,
+    "impersonation": 0.88
+  },
+  {
+    "id": "scam_005",
+    "text": "Congratulations sir, your mobile number has won 25 lakh rupees in Kaun Banega Crorepati KBC lottery lucky draw. To claim your lottery amount deposited in State Bank of India, you just need to pay 12,500 rupees GST tax processing fee into our cashier account right away.",
+    "label": 1,
+    "category": "lottery_fraud",
+    "urgency": 0.86,
+    "impersonation": 0.82
+  },
+  {
+    "id": "scam_006",
+    "text": "Hello, I am calling from TRAI Telecom Regulatory Authority of India. All SIM cards registered under your Aadhaar number will be deactivated within two hours due to illegal harassment SMS sent from your number. Press 9 to connect to cyber crime police cell now.",
+    "label": 1,
+    "category": "telecom_deactivation",
+    "urgency": 0.96,
+    "impersonation": 0.94
+  },
+  {
+    "id": "scam_007",
+    "text": "This is DCP Crime Branch. You are talking to senior police officer. We have caught a hawala operator who has taken your name during interrogation. We are monitoring your phone line. Do not inform family members or disconnect video call, otherwise we will publish public notice.",
+    "label": 1,
+    "category": "digital_arrest",
+    "urgency": 0.99,
+    "impersonation": 0.98
+  },
+  {
+    "id": "normal_001",
+    "text": "Hi Rahul, are you still at the office? Mom asked if you could pick up some milk and fresh vegetables on your way back home. Let me know when you leave.",
+    "label": 0,
+    "category": "personal",
+    "urgency": 0.05,
+    "impersonation": 0.01
+  },
+  {
+    "id": "normal_002",
+    "text": "Good afternoon sir, I am calling from Zomato delivery. I am standing outside your apartment gate, could you please give entry permission to the security guard or share delivery pin?",
+    "label": 0,
+    "category": "delivery",
+    "urgency": 0.20,
+    "impersonation": 0.02
+  },
+  {
+    "id": "normal_003",
+    "text": "Hey Amit, this is Priya from the project team. Just following up on the design review meeting scheduled for tomorrow at 11 AM. Did you get a chance to check the updated slides on Drive?",
+    "label": 0,
+    "category": "work",
+    "urgency": 0.15,
+    "impersonation": 0.01
+  },
+  {
+    "id": "normal_004",
+    "text": "Hello, this is Dr. Sharma's clinic. We are confirming your dental appointment for Friday afternoon at 3:30 PM. Please carry your previous prescription and arrive 10 minutes early.",
+    "label": 0,
+    "category": "appointment",
+    "urgency": 0.10,
+    "impersonation": 0.01
+  },
+  {
+    "id": "normal_005",
+    "text": "Dad, my flight just landed in Bengaluru. I have collected my luggage and I am heading to the cab pickup point now. I will reach the hotel in about an hour.",
+    "label": 0,
+    "category": "personal",
+    "urgency": 0.05,
+    "impersonation": 0.01
+  },
+  {
+    "id": "normal_006",
+    "text": "Hi sir, calling from Urban Company regarding your AC servicing booking at 4 PM today. The technician is on the way and will reach your address in 15 minutes.",
+    "label": 0,
+    "category": "service",
+    "urgency": 0.12,
+    "impersonation": 0.01
+  }
+]
