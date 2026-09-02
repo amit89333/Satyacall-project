@@ -544,6 +544,14 @@
     let isConnecting = false;
 
     function connectWebSocket() {
+      if (window.location.hostname.includes("github.io")) {
+        const badge = document.getElementById("wsStatusBadge");
+        if (badge) {
+          badge.innerHTML = '<div class="pulse-dot"></div> AI Engine Active (Cloud / GitHub Pages)';
+          badge.style.color = "var(--accent-green)";
+        }
+        return;
+      }
       if (isConnecting) return;
       isConnecting = true;
       const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -823,6 +831,118 @@
           list.forEach(s => scenariosData[s.id] = s);
         }
       } catch (e) {}
+    function playScenario(scenarioId, btn) {
+      document.querySelectorAll(".btn-scenario").forEach(b => b.classList.remove("active"));
+      if (btn) {
+        btn.classList.add("active");
+      } else {
+        const el = document.getElementById(`btn_${scenarioId}`);
+        if (el) el.classList.add("active");
+      }
+
+      resetCall();
+      const scenario = scenariosData[scenarioId] || DEFAULT_SCENARIOS.find(s => s.id === scenarioId);
+      if (!scenario) return;
+
+      currentCallerNumber = scenario.caller_number;
+      document.getElementById("phoneCallerName").innerText = scenario.caller_name;
+      document.getElementById("phoneCallerNumber").innerText = scenario.caller_number;
+
+      animateWaveform(true);
+
+      let step = 0;
+      activeScenarioTimer = setInterval(() => {
+        if (step >= scenario.turns.length) {
+          clearInterval(activeScenarioTimer);
+          activeScenarioTimer = null;
+          animateWaveform(false);
+          return;
+        }
+        const turn = scenario.turns[step];
+        sendAudioChunk({
+          caller_number: scenario.caller_number,
+          speaker: turn.speaker,
+          text_override: turn.text,
+          simulate_clone: scenario.is_clone && turn.speaker === "caller"
+        });
+        step++;
+      }, 1600);
+    }
+
+    function sendCustomPhrase() {
+      const input = document.getElementById("customPhraseInput");
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      
+      document.getElementById("phoneCallerName").innerText = "Custom Test Caller";
+      document.getElementById("phoneCallerNumber").innerText = "+91 98765 43210";
+      animateWaveform(true);
+      setTimeout(() => animateWaveform(false), 2000);
+
+      sendAudioChunk({
+        caller_number: "+91 98765 43210",
+        speaker: "caller",
+        text_override: text,
+        simulate_clone: text.toLowerCase().includes("clone") || text.toLowerCase().includes("deepfake")
+      });
+    }
+
+    let waveformInterval = null;
+    function animateWaveform(active) {
+      if (waveformInterval) {
+        clearInterval(waveformInterval);
+        waveformInterval = null;
+      }
+      const bars = document.querySelectorAll(".wave-bar");
+      if (active) {
+        waveformInterval = setInterval(() => {
+          bars.forEach(b => {
+            b.style.height = `${Math.floor(Math.random() * 22) + 6}px`;
+          });
+        }, 150);
+      } else {
+        bars.forEach(b => {
+          b.style.height = "6px";
+        });
+      }
+    }
+
+    function startMicCapture(btn) {
+      document.querySelectorAll(".btn-scenario").forEach(b => b.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+
+      resetCall();
+      document.getElementById("phoneCallerName").innerText = "Live Microphone";
+      document.getElementById("phoneCallerNumber").innerText = "Ambient Mic Stream";
+
+      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        alert("Web Speech API is not supported in this browser. You can use the 'Test Phrase' box below to test any custom sentence instantly!");
+        return;
+      }
+      try {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+
+        recognition.onresult = (event) => {
+          const last = event.results.length - 1;
+          const text = event.results[last][0].transcript;
+          sendAudioChunk({
+            caller_number: "+91 98765 43210",
+            speaker: "caller",
+            text_override: text
+          });
+        };
+        recognition.onerror = (e) => {
+          console.warn("Speech recognition error:", e);
+        };
+        recognition.start();
+        animateWaveform(true);
+      } catch (e) {
+        alert("Microphone capture could not be initialized. Please type your test sentence in the box below!");
+      }
     }
 
     function sendAudioChunk(payload) {
