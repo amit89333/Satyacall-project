@@ -1,0 +1,47 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Databases & local state
+*.db
+*.db-journal
+*.sqlite3
+*.bak
+
+# Environment variables & secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+*.apk
+*.aab
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Antigravity temporary scripts
+scratch/
+check_js.py
+extracted_script.js
+pinggy_out.txt
+pinggy_err.txt
